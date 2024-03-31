@@ -1,7 +1,3 @@
+#pragma once
 
-#pragma once 
-
-namespace vkutil {
-
-
-};
+namespace vkutil {};

@@ -5,27 +5,27 @@
 
 #include <vk_types.h>
 
-class VulkanEngine {
+class VulkanEngine
+{
 public:
+    bool mIsInitialized{false};
+    int mFrameNumber{0};
+    bool mStopRendering{false};
+    VkExtent2D windowExtent{1700,900};
 
-	bool _isInitialized{ false };
-	int _frameNumber {0};
-	bool stop_rendering{ false };
-	VkExtent2D _windowExtent{ 1700 , 900 };
+    struct SDL_Window* window{nullptr};
 
-	struct SDL_Window* _window{ nullptr };
+    static VulkanEngine& Get();
 
-	static VulkanEngine& Get();
+    //initializes everything in the engine
+    void Init();
 
-	//initializes everything in the engine
-	void init();
+    //shuts down the engine
+    void Cleanup();
 
-	//shuts down the engine
-	void cleanup();
+    //draw loop
+    void Draw();
 
-	//draw loop
-	void draw();
-
-	//run main loop
-	void run();
+    //run main loop
+    void Run();
 };

@@ -2,13 +2,11 @@
 
 int main(int argc, char* argv[])
 {
-	VulkanEngine engine;
+    VulkanEngine engine;
 
-	engine.init();	
-	
-	engine.run();	
+    engine.Init();
+    engine.Run();
+    engine.Cleanup();
 
-	engine.cleanup();	
-
-	return 0;
+    return 0;
 }

@@ -1,7 +1,5 @@
-﻿#pragma once 
+﻿#pragma once
+
 #include <vk_types.h>
 
-namespace vkutil {
-
-
-};
+namespace vkutil {};
