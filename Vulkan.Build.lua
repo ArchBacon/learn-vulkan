@@ -43,7 +43,7 @@ project "Engine"
     filter "system:windows"
         systemversion "latest"
         postbuildcommands {
-            --("{COPY} ../ThirdParty/SDL2/SDL2/lib/SDL2.dll ../Binaries/" .. outputdir .. "/Afterlife/"),
+            ("{COPY} Assets/ ../Binaries/" .. outputdir .. "/Afterlife/Assets/"),
         }
 
     filter "configurations:Debug"
