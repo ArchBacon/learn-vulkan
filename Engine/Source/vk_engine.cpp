@@ -40,7 +40,17 @@ void VulkanEngine::Init()
 
 void VulkanEngine::Cleanup()
 {
-    if (isInitialized) { SDL_DestroyWindow(window); }
+    if (isInitialized)
+    {
+        DestroySwapchain();
+
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyDevice(device, nullptr);
+        
+        vkb::destroy_debug_utils_messenger(instance, debugMessenger);
+        vkDestroyInstance(instance, nullptr);
+        SDL_DestroyWindow(window);
+    }
 
     // clear engine pointer
     loadedEngine = nullptr;
