@@ -40,6 +40,10 @@ project "Engine"
         "vulkan-1.lib",
     }
 
+    defines {
+        "FMT_HEADER_ONLY",
+    }
+
     filter "system:windows"
         systemversion "latest"
         postbuildcommands {

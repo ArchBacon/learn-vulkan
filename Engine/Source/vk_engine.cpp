@@ -68,6 +68,11 @@ void VulkanEngine::Run()
                 if (e.window.event == SDL_WINDOWEVENT_MINIMIZED) { mStopRendering = true; }
                 if (e.window.event == SDL_WINDOWEVENT_RESTORED) { mStopRendering = false; }
             }
+            
+            if (e.type == SDL_KEYDOWN)
+            {
+                fmt::print("Key pressed: {}.\n", SDL_GetKeyName(e.key.keysym.sym));
+            }
         }
 
         // do not draw if we are minimized
