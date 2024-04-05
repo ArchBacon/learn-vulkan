@@ -8,11 +8,12 @@ indent_style = space
 indent_size = 4
 
 # ReSharper properties
+resharper_align_multiline_calls_chain = false
 resharper_align_multiline_expression_braces = true
 resharper_align_ternary = none
 resharper_autodetect_indent_settings = true
 resharper_blank_lines_around_function_definition = 0
-resharper_continuous_line_indent = double
+resharper_continuous_line_indent = single
 resharper_cpp_brace_style = next_line
 resharper_cpp_case_block_braces = next_line
 resharper_cpp_empty_block_style = together_same_line
