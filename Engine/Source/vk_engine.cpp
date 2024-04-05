@@ -5,10 +5,12 @@
 #include <SDL.h>
 #include <SDL_vulkan.h>
 #include <thread>
-#include <vk_initializers.h>
-#include <vk_types.h>
+#include <vkbootstrap/VkBootstrap.h>
+#include "vk_initializers.h"
+#include "vk_types.h"
 
 VulkanEngine* loadedEngine = nullptr;
+constexpr bool bUseValidationLayers = true;
 
 VulkanEngine& VulkanEngine::Get() { return *loadedEngine; }
 
@@ -33,12 +35,12 @@ void VulkanEngine::Init()
     );
 
     // everything went fine
-    mIsInitialized = true;
+    isInitialized = true;
 }
 
 void VulkanEngine::Cleanup()
 {
-    if (mIsInitialized) { SDL_DestroyWindow(window); }
+    if (isInitialized) { SDL_DestroyWindow(window); }
 
     // clear engine pointer
     loadedEngine = nullptr;
@@ -68,7 +70,7 @@ void VulkanEngine::Run()
                 if (e.window.event == SDL_WINDOWEVENT_MINIMIZED) { mStopRendering = true; }
                 if (e.window.event == SDL_WINDOWEVENT_RESTORED) { mStopRendering = false; }
             }
-            
+
             if (e.type == SDL_KEYDOWN)
             {
                 fmt::print("Key pressed: {}.\n", SDL_GetKeyName(e.key.keysym.sym));
@@ -85,4 +87,69 @@ void VulkanEngine::Run()
 
         Draw();
     }
+}
+
+void VulkanEngine::InitVulkan()
+{
+    vkb::InstanceBuilder builder;
+
+    // Make the vulkan instance, with basic debug features
+    auto result = builder
+                  .set_app_name("Example Vulkan Application")
+                  .request_validation_layers(bUseValidationLayers)
+                  .use_default_debug_messenger()
+                  .require_api_version(1, 3, 0)
+                  .build();
+
+    vkb::Instance vkbInstance = result.value();
+
+    // Grab the instance
+    instance = vkbInstance.instance;
+    debugMessenger = vkbInstance.debug_messenger;
+
+    SDL_Vulkan_CreateSurface(window, instance, &surface);
+
+    // Vulkan 1.3 features
+    VkPhysicalDeviceVulkan13Features features13{};
+    features13.dynamicRendering = true;
+    features13.synchronization2 = true;
+
+    // Vulkan 1.2 features
+    VkPhysicalDeviceVulkan12Features features12{};
+    features12.bufferDeviceAddress = true;
+    features12.descriptorIndexing = true;
+
+    // Use vkbootstrap to select a GPU
+    // We want a GPU that can write tot he SDL surface and supports vulkan 1.3 with the correct features
+    vkb::PhysicalDeviceSelector selector{vkbInstance};
+    vkb::PhysicalDevice physicalDevice = selector
+                                         .set_minimum_version(1, 3)
+                                         .set_required_features_13(features13)
+                                         .set_required_features_12(features12)
+                                         .set_surface(surface)
+                                         .select()
+                                         .value();
+
+    // Create the final vulkan device
+    vkb::DeviceBuilder deviceBuilder{physicalDevice};
+    vkb::Device vkbDevice = deviceBuilder.build().value();
+    
+    // Get the VkDevice handle used in the rest of a vulkan application
+    device = vkbDevice.device;
+    chosenGPU = physicalDevice.physical_device;
+}
+
+void VulkanEngine::InitSwapchain()
+{
+    // nothing yet
+}
+
+void VulkanEngine::InitCommands()
+{
+    // nothing yet
+}
+
+void VulkanEngine::InitSyncStructures()
+{
+    // nothing yet
 }

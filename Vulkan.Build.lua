@@ -12,6 +12,7 @@ project "Engine"
     staticruntime "on"
     cppdialect "C++17"
 
+    warnings "High"
     targetdir ("Binaries/" .. outputdir .. "/%{prj.name}")
     objdir ("Intermediate/" .. outputdir .. "/%{prj.name}")
 
@@ -20,6 +21,7 @@ project "Engine"
         "%{prj.name}/Source/**.cpp",
         "%{prj.name}/Assets/**",
         "%{prj.name}/Shaders/**",
+        "%{prj.name}/ThirdParty/vkbootstrap/VkBootstrap.cpp", -- I don't want this included in the engine, but oh well
     }
 
     includedirs {
