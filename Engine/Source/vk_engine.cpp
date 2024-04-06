@@ -40,12 +40,12 @@ void VulkanEngine::Init()
     InitSyncStructures();
 
     // everything went fine
-    isInitialized = true;
+    bIsInitialized = true;
 }
 
 void VulkanEngine::Cleanup()
 {
-    if (isInitialized)
+    if (bIsInitialized)
     {
         // Make sure the GPU has stopped doing its things
         vkDeviceWaitIdle(device);
@@ -89,8 +89,8 @@ void VulkanEngine::Run()
 
             if (e.type == SDL_WINDOWEVENT)
             {
-                if (e.window.event == SDL_WINDOWEVENT_MINIMIZED) { mStopRendering = true; }
-                if (e.window.event == SDL_WINDOWEVENT_RESTORED) { mStopRendering = false; }
+                if (e.window.event == SDL_WINDOWEVENT_MINIMIZED) { bStopRendering = true; }
+                if (e.window.event == SDL_WINDOWEVENT_RESTORED) { bStopRendering = false; }
             }
 
             if (e.type == SDL_KEYDOWN)
@@ -100,7 +100,7 @@ void VulkanEngine::Run()
         }
 
         // do not draw if we are minimized
-        if (mStopRendering)
+        if (bStopRendering)
         {
             // throttle the speed to avoid the endless spinning
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

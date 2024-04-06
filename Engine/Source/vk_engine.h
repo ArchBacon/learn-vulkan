@@ -18,9 +18,9 @@ constexpr uint8_t FRAME_OVERLAP = 2;
 class VulkanEngine
 {
 public:
-    bool isInitialized{false};
-    int mFrameNumber{0};
-    bool mStopRendering{false};
+    bool bIsInitialized{false};
+    int frameNumber{0};
+    bool bStopRendering{false};
     VkExtent2D windowExtent{1700,900};
 
     struct SDL_Window* window{nullptr};
