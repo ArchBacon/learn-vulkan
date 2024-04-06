@@ -34,6 +34,11 @@ void VulkanEngine::Init()
         windowFlags
     );
 
+    InitVulkan();
+    InitSwapchain();
+    InitCommands();
+    InitSyncStructures();
+
     // everything went fine
     isInitialized = true;
 }
@@ -42,26 +47,14 @@ void VulkanEngine::Cleanup()
 {
     if (isInitialized)
     {
-        //ERROR - Instance destroyed before others
-        {
-            vkDestroyInstance(instance, nullptr);
-
-            DestroySwapchain();
-
-            vkDestroyDevice(device, nullptr);
-            vkDestroySurfaceKHR(instance, surface, nullptr);
-            vkb::destroy_debug_utils_messenger(instance, debugMessenger);
-            SDL_DestroyWindow(window);
-        }
+        DestroySwapchain();
         
-        // DestroySwapchain();
-        //
-        // vkDestroySurfaceKHR(instance, surface, nullptr);
-        // vkDestroyDevice(device, nullptr);
-        //
-        // vkb::destroy_debug_utils_messenger(instance, debugMessenger);
-        // vkDestroyInstance(instance, nullptr);
-        // SDL_DestroyWindow(window);
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyDevice(device, nullptr);
+        
+        vkb::destroy_debug_utils_messenger(instance, debugMessenger);
+        vkDestroyInstance(instance, nullptr);
+        SDL_DestroyWindow(window);
     }
 
     // clear engine pointer
