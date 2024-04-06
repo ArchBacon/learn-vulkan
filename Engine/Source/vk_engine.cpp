@@ -47,6 +47,13 @@ void VulkanEngine::Cleanup()
 {
     if (isInitialized)
     {
+        // Make sure the GPU has stopped doing its things
+        vkDeviceWaitIdle(device);
+        for (auto& [commandPool, commandBuffer] : frames)
+        {
+            vkDestroyCommandPool(device, commandPool, nullptr);
+        }
+        
         DestroySwapchain();
         
         vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -152,6 +159,10 @@ void VulkanEngine::InitVulkan()
     // Get the VkDevice handle used in the rest of a vulkan application
     device = vkbDevice.device;
     chosenGPU = physicalDevice.physical_device;
+
+    // Use vkbootstrap to get a Graphics queue
+    graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+    graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 }
 
 void VulkanEngine::InitSwapchain()
@@ -161,7 +172,18 @@ void VulkanEngine::InitSwapchain()
 
 void VulkanEngine::InitCommands()
 {
-    // nothing yet
+    // Create a command pool for commands submitted to the graphics queue
+    // We also want the pool to allow for resetting of individual command buffers
+    VkCommandPoolCreateInfo commandPoolInfo = vkinit::command_pool_create_info(graphicsQueueFamily, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+
+    for (auto& [commandPool, commandBuffer] : frames)
+    {
+        VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &commandPool));
+
+        // Allocate the default command buffer that we will use for rendering
+        VkCommandBufferAllocateInfo cmdAllocInfo = vkinit::command_buffer_allocate_info(commandPool, 1);
+        VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &commandBuffer));
+    }
 }
 
 void VulkanEngine::InitSyncStructures()

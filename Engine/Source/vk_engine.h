@@ -7,6 +7,14 @@
 #include "vk_initializers.h"
 #include "vk_types.h"
 
+struct FrameData
+{
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
+};
+
+constexpr uint8_t FRAME_OVERLAP = 2;
+
 class VulkanEngine
 {
 public:
@@ -43,6 +51,12 @@ public:
     std::vector<VkImage> swapchainImages;
     std::vector<VkImageView> swapchainImageViews;
     VkExtent2D swapchainExtend;
+
+    FrameData frames[FRAME_OVERLAP];
+    FrameData& GetCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; }
+
+    VkQueue graphicsQueue;
+    uint32_t graphicsQueueFamily;
 
 private:
     void InitVulkan();
