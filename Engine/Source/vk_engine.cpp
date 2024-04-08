@@ -49,9 +49,9 @@ void VulkanEngine::Cleanup()
     {
         // Make sure the GPU has stopped doing its things
         vkDeviceWaitIdle(device);
-        for (auto& [commandPool, commandBuffer] : frames)
+        for (int i = 0; i < FRAME_OVERLAP; i++)
         {
-            vkDestroyCommandPool(device, commandPool, nullptr);
+            vkDestroyCommandPool(device, frames[i].commandPool, nullptr);
         }
         
         DestroySwapchain();
@@ -176,20 +176,33 @@ void VulkanEngine::InitCommands()
     // We also want the pool to allow for resetting of individual command buffers
     VkCommandPoolCreateInfo commandPoolInfo = vkinit::command_pool_create_info(graphicsQueueFamily, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
-    for (auto& [commandPool, commandBuffer] : frames)
+    for (int i = 0; i < FRAME_OVERLAP; i++)
     {
-        VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &commandPool));
+        VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &frames[i].commandPool));
 
         // Allocate the default command buffer that we will use for rendering
-        VkCommandBufferAllocateInfo cmdAllocInfo = vkinit::command_buffer_allocate_info(commandPool, 1);
-        VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &commandBuffer));
+        VkCommandBufferAllocateInfo cmdAllocInfo = vkinit::command_buffer_allocate_info(frames[i].commandPool, 1);
+        VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &frames[i].commandBuffer));
     }
 }
 
 void VulkanEngine::InitSyncStructures()
 {
-    // nothing yet
-}
+    // Create synchronization structures
+    // One fence to control when the GPU has finished rendering the frame,
+    // and 2 semaphores to synchronize rendering with swapchain
+    // We want the fence to start signalled so we can wait on it on the first time
+    VkFenceCreateInfo fenceInfo = vkinit::fence_create_info(VK_FENCE_CREATE_SIGNALED_BIT);
+    VkSemaphoreCreateInfo semaphoreInfo = vkinit::semaphore_create_info();
+
+    for (int i = 0; i < FRAME_OVERLAP; i++)
+    {
+        VK_CHECK(vkCreateFence(device, &fenceInfo, nullptr, &frames[i].renderFence));
+        
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &frames[i].swapchainSemaphore));
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &frames[i].renderSemaphore));
+    }
+} 
 
 void VulkanEngine::CreateSwapchain(uint32_t width, uint32_t height)
 {
