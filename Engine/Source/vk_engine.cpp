@@ -51,6 +51,8 @@ void VulkanEngine::Cleanup()
     {
         // Make sure the GPU has stopped doing its things
         vkDeviceWaitIdle(device);
+        mainDeletionQueue.Flush();
+        
         for (int i = 0; i < FRAME_OVERLAP; i++)
         {
             auto& frame = frames[i];
@@ -79,6 +81,7 @@ void VulkanEngine::Draw()
 {
     // Wait until the GPU has finished rendering the last frame. Timeout of 1 second
     VK_CHECK(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
+    GetCurrentFrame().deletionQueue.Flush();
     VK_CHECK(vkResetFences(device, 1, &GetCurrentFrame().renderFence));
 
     // Request image from the swapchain
