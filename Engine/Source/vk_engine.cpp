@@ -6,6 +6,9 @@
 #include <SDL_vulkan.h>
 #include <thread>
 #include <vkbootstrap/VkBootstrap.h>
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
+
 
 #include "vk_images.h"
 #include "vk_initializers.h"
@@ -242,6 +245,19 @@ void VulkanEngine::InitVulkan()
     // Use vkbootstrap to get a Graphics queue
     graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
     graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+    // Initialize the memory allocator
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = chosenGPU;
+    allocatorInfo.device = device;
+    allocatorInfo.instance = instance;
+    allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+    vmaCreateAllocator(&allocatorInfo, &allocator);
+
+    mainDeletionQueue.PushFunction([&]() -> void
+    {
+       vmaDestroyAllocator(allocator); 
+    });
 }
 
 void VulkanEngine::InitSwapchain()

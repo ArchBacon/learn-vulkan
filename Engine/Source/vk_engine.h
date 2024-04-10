@@ -82,6 +82,7 @@ public:
     VkQueue graphicsQueue;
     uint32_t graphicsQueueFamily;
     DeletionQueue mainDeletionQueue;
+    VmaAllocator allocator;
 
 private:
     void InitVulkan();
